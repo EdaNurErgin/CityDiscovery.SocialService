@@ -27,17 +27,13 @@ namespace SocialService.Application.Queries.GetPost
             var postDto = new PostDto
             {
                 Id = post.Id,
-                UserId = post.UserId,
-                Content = post.Content,
-                CreatedDate = post.CreatedDate,
-                LikeCount = post.Likes.Count, // Beğeni sayısını hesaplıyoruz
-                Comments = post.Comments.Select(c => new CommentDto
-                {
-                    Id = c.Id,
-                    UserId = c.UserId,
-                    Content = c.Content,
-                    CreatedDate = c.CreatedDate
-                }).ToList()
+                VenueId = post.VenueId,
+                AuthorUserId = post.UserId,
+                Caption = post.Content,
+                PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(),
+                LikeCount = post.Likes?.Count ?? 0,
+                CommentCount = post.Comments?.Count ?? 0,
+                CreatedAt = post.CreatedDate
             };
 
             return postDto;

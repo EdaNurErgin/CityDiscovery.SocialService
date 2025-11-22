@@ -1,12 +1,12 @@
-﻿using System;
+﻿using MediatR;
+using SocialService.Shared.Common.DTOs.Social;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SocialService.Application.Queries.GetPostsByVenue
 {
-    internal class GetPostsByVenueQuery
+    public class GetPostsByVenueQuery : IRequest<List<PostDto>>
     {
+        public Guid VenueId { get; set; }
     }
 }

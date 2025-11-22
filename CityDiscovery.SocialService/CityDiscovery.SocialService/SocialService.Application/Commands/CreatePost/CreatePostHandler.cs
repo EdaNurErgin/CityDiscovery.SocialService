@@ -10,14 +10,16 @@ namespace SocialService.Application.Commands.CreatePost
         private readonly IPostRepository _postRepository;
         private readonly IVenueServiceClient _venueServiceClient;
         private readonly IMediator _mediator;
+        private readonly IMessageBus _messageBus;
 
         // Handler, veritabanı işlemleri için bir repository'e ihtiyaç duyar.
         // Bu repository'i "Dependency Injection" ile alacağız.
-        public CreatePostHandler(IPostRepository postRepository, IVenueServiceClient venueServiceClient, IMediator mediator)
+        public CreatePostHandler(IPostRepository postRepository, IVenueServiceClient venueServiceClient, IMediator mediator, IMessageBus messageBus)
         {
             _postRepository = postRepository;
             _venueServiceClient = venueServiceClient;
             _mediator = mediator;
+            _messageBus = messageBus;
         }
 
         public async Task<Guid> Handle(CreatePostCommand request, CancellationToken cancellationToken)
@@ -42,18 +44,37 @@ namespace SocialService.Application.Commands.CreatePost
             // 3. Veritabanına kaydet.
             await _postRepository.AddAsync(newPost);
 
-            //4. Olayı oluştur ve MediatR ile yayınla
+            // 4. Olayı oluştur ve MediatR ile yayınla (internal event handlers için)
             var postCreatedEvent = new PostCreatedEvent(
-            postId: newPost.Id,
-            userId: newPost.UserId,
-            content: newPost.Content,
-            createdDate: newPost.CreatedDate);
+                postId: newPost.Id,
+                userId: newPost.UserId,
+                content: newPost.Content,
+                createdDate: newPost.CreatedDate);
 
-            await _mediator.Publish(postCreatedEvent, cancellationToken);
+            // MediatR ile yayınla (await kullan, ama hata olsa bile devam et)
+            try
+            {
+                await _mediator.Publish(postCreatedEvent, cancellationToken);
+            }
+            catch
+            {
+                // MediatR handler'larında hata olsa bile devam et
+            }
 
+            // 5. MessageBus ile de yayınla (asenkron event için - fire-and-forget)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _messageBus.PublishAsync(postCreatedEvent, cancellationToken);
+                }
+                catch
+                {
+                    // MessageBus'ta hata olsa bile devam et
+                }
+            });
 
             return newPost.Id;
-
         }
     }
 }

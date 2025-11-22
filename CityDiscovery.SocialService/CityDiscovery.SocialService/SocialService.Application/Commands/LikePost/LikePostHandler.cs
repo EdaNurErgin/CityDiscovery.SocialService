@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SocialService.Application.Interfaces;
 using SocialService.Domain.Entities;
+using SocialService.Shared.Common.Events.Social;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,11 +12,13 @@ namespace SocialService.Application.Commands.LikePost
     {
         private readonly ILikeRepository _likeRepository;
         private readonly IPostRepository _postRepository;
+        private readonly IMessageBus _messageBus;
 
-        public LikePostHandler(ILikeRepository likeRepository, IPostRepository postRepository)
+        public LikePostHandler(ILikeRepository likeRepository, IPostRepository postRepository, IMessageBus messageBus)
         {
             _likeRepository = likeRepository;
             _postRepository = postRepository;
+            _messageBus = messageBus;
         }
 
         public async Task<bool> Handle(LikePostCommand request, CancellationToken cancellationToken)
@@ -48,6 +51,26 @@ namespace SocialService.Application.Commands.LikePost
                 };
 
                 await _likeRepository.AddAsync(like);
+
+                // PostLikedEvent'i MessageBus ile yayınla (fire-and-forget)
+                var postLikedEvent = new PostLikedEvent(
+                    postId: request.PostId,
+                    userId: request.UserId,
+                    likedAt: like.LikedDate);
+
+                // Fire-and-forget: Hata olsa bile response'u bekletme
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _messageBus.PublishAsync(postLikedEvent, cancellationToken);
+                    }
+                    catch
+                    {
+                        // MessageBus'ta hata olsa bile devam et
+                    }
+                });
+
                 return true; // Beğeni eklendi
             }
         }

@@ -1,12 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SocialService.Shared.Common.Events.Social
 {
-    internal class PostLikedEvent
+    public class PostLikedEvent
     {
+        public Guid PostId { get; set; }
+        public Guid UserId { get; set; }
+        public DateTime LikedAt { get; set; }
+
+        public PostLikedEvent(Guid postId, Guid userId, DateTime likedAt)
+        {
+            PostId = postId;
+            UserId = userId;
+            LikedAt = likedAt;
+        }
     }
 }
