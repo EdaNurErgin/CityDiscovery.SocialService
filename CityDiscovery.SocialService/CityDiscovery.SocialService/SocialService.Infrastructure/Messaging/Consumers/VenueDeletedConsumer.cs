@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
 using SocialService.Application.Interfaces;
-using SocialService.Shared.Common.Events.Venue;
+using CityDiscovery.VenueService.VenuesService.Shared.Common.Events.Venue;
 using System;
 using System.Threading.Tasks;
 
