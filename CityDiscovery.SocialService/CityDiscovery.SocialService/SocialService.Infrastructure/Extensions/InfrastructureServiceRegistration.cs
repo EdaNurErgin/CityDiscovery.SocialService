@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CityDiscovery.SocialService.SocialService.Infrastructure.Messaging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using SocialService.Application.Interfaces;
 using SocialService.Infrastructure.HttpClients;
-using SocialService.Infrastructure.Repositories;
 using SocialService.Infrastructure.Messaging;
-using Microsoft.Extensions.Http;
-using CityDiscovery.SocialService.SocialService.Infrastructure.Messaging;
+using SocialService.Infrastructure.Repositories;
+using SocialService.Infrastructure.Services;
 
 
 namespace SocialService.Infrastructure.Extensions
@@ -18,12 +19,9 @@ namespace SocialService.Infrastructure.Extensions
             services.AddScoped<IPostRepository, PostRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ILikeRepository, LikeRepository>();
-
-            // HttpClient'ı ve VenueServiceClient'ı kaydediyoruz.
+            services.AddScoped<IImageService, LocalImageService>();
             services.AddHttpClient<IVenueServiceClient, VenueServiceClient>(client =>
             {
-                // VenueService'in adresini appsettings.json'dan alacağız.
-                // Şimdilik buraya bir örnek adres yazalım.
                 client.BaseAddress = new Uri("http://localhost:5001");
             });
 

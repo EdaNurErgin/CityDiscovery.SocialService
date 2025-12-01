@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SocialService.API.DTOs;
 using SocialService.Application.Commands.CreatePost;
+using SocialService.Application.Interfaces;
 using SocialService.Application.Queries.GetPost;
-using SocialService.Application.Queries.GetPostsByVenue;
 using SocialService.Application.Queries.GetPostLikeCount;
+using SocialService.Application.Queries.GetPostsByVenue;
 using SocialService.Shared.Common.DTOs.Social;
 using System;
 using System.Collections.Generic;
@@ -23,9 +25,11 @@ namespace SocialService.API.Controllers
     public class PostsController : ControllerBase
     {
         private readonly IMediator _mediator;
-        public PostsController(IMediator mediator)
+        private readonly IImageService _imageService; // Servisi enjekte ediyoruz
+        public PostsController(IMediator mediator, IImageService imageService)
         {
             _mediator = mediator;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -52,15 +56,36 @@ namespace SocialService.API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreatePost([FromBody] CreatePostCommand command)
+        public async Task<IActionResult> CreatePost([FromForm] CreatePostRequest request)
         {
             try
             {
-                // Gelen isteği (command) MediatR'a gönderiyoruz.
-                // MediatR doğru handler'ı (CreatePostHandler) bulup çalıştıracak.
+                // 1. Fotoğrafları kaydet ve URL listesi oluştur
+                var photoUrls = new List<string>();
+
+                if (request.Photos != null && request.Photos.Count > 0)
+                {
+                    foreach (var file in request.Photos)
+                    {
+                        var savedPath = await _imageService.SaveImageAsync(file);
+                        if (!string.IsNullOrEmpty(savedPath))
+                        {
+                            photoUrls.Add(savedPath);
+                        }
+                    }
+                }
+
+                // 2. Command oluştur (Resim URL'leri ile)
+                var command = new CreatePostCommand
+                {
+                    UserId = request.UserId,
+                    VenueId = request.VenueId,
+                    Content = request.Content,
+                    PhotoUrls = photoUrls // Kaydedilen resimlerin yollarını aktar
+                };
+
                 var postId = await _mediator.Send(command);
 
-                // Başarılı bir şekilde oluşturulduğunda, yeni post'un ID'si ile birlikte 201 Created yanıtı dönüyoruz.
                 return CreatedAtAction(nameof(GetPostById), new { id = postId }, new { id = postId });
             }
             catch (Exception ex)
@@ -68,7 +93,6 @@ namespace SocialService.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
         /// <summary>
         /// ID'ye göre bir gönderi getirir
         /// </summary>

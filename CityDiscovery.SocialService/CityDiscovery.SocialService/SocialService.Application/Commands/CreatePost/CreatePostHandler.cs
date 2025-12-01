@@ -40,7 +40,19 @@ namespace SocialService.Application.Commands.CreatePost
                 Content = request.Content,
                 CreatedDate = DateTime.UtcNow
             };
-
+            // Fotografları Post nesnesine ekle
+            if (request.PhotoUrls != null && request.PhotoUrls.Any())
+            {
+                foreach (var url in request.PhotoUrls)
+                {
+                    newPost.Photos.Add(new PostPhoto
+                    {
+                        ImageUrl = url,
+                        CreatedDate = DateTime.UtcNow,
+                        CreatedBy = request.UserId
+                    });
+                }
+            }
             // 3. Veritabanına kaydet.
             await _postRepository.AddAsync(newPost);
 

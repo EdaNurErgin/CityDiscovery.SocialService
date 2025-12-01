@@ -155,7 +155,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 // Authentication middleware'i Authorization'dan ÖNCE olmalı
 app.UseAuthentication();
 app.UseAuthorization();
