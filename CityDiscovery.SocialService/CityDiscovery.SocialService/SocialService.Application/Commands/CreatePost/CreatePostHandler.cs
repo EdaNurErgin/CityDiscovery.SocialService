@@ -38,7 +38,9 @@ namespace SocialService.Application.Commands.CreatePost
                 UserId = request.UserId,
                 VenueId = request.VenueId, // Yeni alanı ekliyoruz
                 Content = request.Content,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                AuthorUserName = "Kullanıcı Adı", 
+                AuthorAvatarUrl = "Avatar URL"
             };
             // Fotografları Post nesnesine ekle
             if (request.PhotoUrls != null && request.PhotoUrls.Any())

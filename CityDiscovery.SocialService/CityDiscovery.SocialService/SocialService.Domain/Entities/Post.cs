@@ -6,6 +6,8 @@ namespace SocialService.Domain.Entities
     public class Post : BaseEntity
     {
         public Guid UserId { get; set; }
+        public string AuthorUserName { get; set; }
+        public string AuthorAvatarUrl { get; set; }
         public string Content { get; set; }
         public DateTime CreatedDate { get; set; }
         public Guid VenueId { get; set; }
