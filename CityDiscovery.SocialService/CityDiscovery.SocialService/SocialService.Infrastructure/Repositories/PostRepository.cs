@@ -72,5 +72,26 @@ namespace SocialService.Infrastructure.Repositories
             _context.Posts.RemoveRange(posts);
             await _context.SaveChangesAsync();
         }
+
+        // Mevcut metodların altına ekle:
+        public async Task UpdateAuthorDetailsAsync(Guid userId, string newUserName, string newAvatarUrl)
+        {
+            // 1. DÜZELTME: AuthorUserId yerine UserId kullanıldı
+            var posts = await _context.Posts
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+
+            if (posts.Any())
+            {
+                foreach (var post in posts)
+                {
+                    // 2. GÜNCELLEME: Artık entity'de bu alanlar var, güncelleyebiliriz.
+                    post.AuthorUserName = newUserName;
+                    post.AuthorAvatarUrl = newAvatarUrl;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

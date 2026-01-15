@@ -13,5 +13,6 @@ namespace SocialService.Application.Interfaces
         Task<List<Post>> GetByUserIdAsync(Guid userId);
         Task DeletePostsByVenueIdAsync(Guid venueId);
         Task DeletePostsByUserIdAsync(Guid userId);
+        Task UpdateAuthorDetailsAsync(Guid userId, string newUserName, string newAvatarUrl);
     }
 }

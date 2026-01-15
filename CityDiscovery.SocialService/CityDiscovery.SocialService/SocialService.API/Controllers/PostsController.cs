@@ -58,34 +58,80 @@ namespace SocialService.API.Controllers
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreatePost([FromForm] CreatePostRequest request)
         {
+            //try
+            //{
+            //    // 1. Fotoğrafları kaydet ve URL listesi oluştur
+            //    var photoUrls = new List<string>();
+
+            //    if (request.Photos != null && request.Photos.Count > 0)
+            //    {
+            //        foreach (var file in request.Photos)
+            //        {
+            //            var savedPath = await _imageService.SaveImageAsync(file);
+            //            if (!string.IsNullOrEmpty(savedPath))
+            //            {
+            //                photoUrls.Add(savedPath);
+            //            }
+            //        }
+            //    }
+
+            //    // 2. Command oluştur (Resim URL'leri ile)
+            //    var command = new CreatePostCommand
+            //    {
+            //        UserId = request.UserId,
+            //        VenueId = request.VenueId,
+            //        Content = request.Content,
+            //        PhotoUrls = photoUrls // Kaydedilen resimlerin yollarını aktar
+            //    };
+
+            //    var postId = await _mediator.Send(command);
+
+            //    return CreatedAtAction(nameof(GetPostById), new { id = postId }, new { id = postId });
+            //}
+            //catch (Exception ex)
+            //{
+            //    return BadRequest(new { error = ex.Message });
+            //}
+
             try
             {
-                // 1. Fotoğrafları kaydet ve URL listesi oluştur
-                var photoUrls = new List<string>();
+                // 1. Önce Token içerisinden kullanıcı ID'sini almayı dene
+                // Not: Identity Service'te 'sub' veya 'NameIdentifier' olarak tutulur.
+                var userIdFromClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
+                Guid finalUserId;
+
+                if (!string.IsNullOrEmpty(userIdFromClaim))
+                {
+                    finalUserId = Guid.Parse(userIdFromClaim);
+                }
+                else
+                {
+                    // Token yoksa veya ID içermiyorsa mevcut manuel ID'yi kullan (Test kolaylığı için)
+                    finalUserId = request.UserId;
+                }
+
+                // 2. Fotoğrafları kaydetme işlemleri (mevcut kodunuz)
+                var photoUrls = new List<string>();
                 if (request.Photos != null && request.Photos.Count > 0)
                 {
                     foreach (var file in request.Photos)
                     {
                         var savedPath = await _imageService.SaveImageAsync(file);
-                        if (!string.IsNullOrEmpty(savedPath))
-                        {
-                            photoUrls.Add(savedPath);
-                        }
+                        if (!string.IsNullOrEmpty(savedPath)) photoUrls.Add(savedPath);
                     }
                 }
 
-                // 2. Command oluştur (Resim URL'leri ile)
+                // 3. Command oluştururken belirlediğimiz finalUserId'yi veriyoruz
                 var command = new CreatePostCommand
                 {
-                    UserId = request.UserId,
+                    UserId = finalUserId,
                     VenueId = request.VenueId,
                     Content = request.Content,
-                    PhotoUrls = photoUrls // Kaydedilen resimlerin yollarını aktar
+                    PhotoUrls = photoUrls
                 };
 
                 var postId = await _mediator.Send(command);
-
                 return CreatedAtAction(nameof(GetPostById), new { id = postId }, new { id = postId });
             }
             catch (Exception ex)
