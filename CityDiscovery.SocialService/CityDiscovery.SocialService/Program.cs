@@ -146,6 +146,9 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
+// Health Checks
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -160,6 +163,9 @@ app.UseStaticFiles();
 // Authentication middleware'i Authorization'dan ÖNCE olmalı
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health Check Endpoint
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 
