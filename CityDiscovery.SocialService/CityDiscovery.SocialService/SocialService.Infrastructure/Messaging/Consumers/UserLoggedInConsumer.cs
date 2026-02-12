@@ -1,6 +1,5 @@
+using IdentityService.Shared.MessageBus.Identity;
 using MassTransit;
-using Microsoft.Extensions.Logging;
-using SocialService.Shared.Common.Events.Identity;
 
 namespace CityDiscovery.SocialService.SocialService.Infrastructure.Messaging.Consumers
 {

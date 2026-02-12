@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SocialServiceShared.Common.Events.Identity
+namespace IdentityService.Shared.MessageBus.Identity
 {
     public class UserUpdatedEvent
     {

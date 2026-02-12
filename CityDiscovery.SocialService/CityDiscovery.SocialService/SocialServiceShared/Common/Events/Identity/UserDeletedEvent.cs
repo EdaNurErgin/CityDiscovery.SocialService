@@ -1,6 +1,6 @@
 using System;
 
-namespace SocialService.Shared.Common.Events.Identity
+namespace IdentityService.Shared.MessageBus.Identity
 {
     public class UserDeletedEvent
     {

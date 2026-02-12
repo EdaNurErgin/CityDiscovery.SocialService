@@ -1,4 +1,5 @@
-﻿using SocialService.Application.Interfaces;
+﻿using CityDiscovery.SocialService.SocialService.Application.DTOs; // DTO'nun olduğu yer
+using SocialService.Application.Interfaces;
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -9,67 +10,56 @@ namespace SocialService.Infrastructure.HttpClients
     public class VenueServiceClient : IVenueServiceClient
     {
         private readonly HttpClient _httpClient;
-        
+
         public VenueServiceClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-        
-        public async Task<bool> VenueExistsAsync(Guid venueId)
-        {
-            return await CheckVenueExistsAsync(venueId);
-        }
 
-        public async Task<bool> CheckVenueExistsAsync(Guid venueId)
-        {
-            try
-            {
-                // Gerçek senaryoda, VenueService'in ilgili endpoint'ini çağırırız.
-                // Örneğin: var response = await _httpClient.GetAsync($"/api/venues/{venueId}");
-                // return response.IsSuccessStatusCode;
-
-                // ŞİMDİLİK, VenueService hazır olmadığı için, test amacıyla her zaman doğru varsayalım.
-                return await Task.FromResult(true);
-            }
-            catch
-            {
-                // Hata durumunda mekan yokmuş gibi davranabiliriz.
-                return false;
-            }
-        }
-
+        // 1. Mekan Detaylarını Getir (Gerçek Bağlantı)
         public async Task<VenueDto> GetVenueAsync(Guid venueId)
         {
             try
             {
-                // Gerçek senaryoda, VenueService'in ilgili endpoint'ini çağırırız.
-                // Örneğin: var response = await _httpClient.GetAsync($"/api/venues/{venueId}");
-                // return await response.Content.ReadFromJsonAsync<VenueDto>();
+                // Venue Service'e GET isteği atıyoruz
+                var response = await _httpClient.GetAsync($"api/venues/{venueId}");
 
-                // ŞİMDİLİK, VenueService hazır olmadığı için, test amacıyla null döndürelim.
-                return await Task.FromResult<VenueDto>(null);
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Mekan bulunamazsa null dön
+                    return null;
+                }
+
+                // Gelen veriyi DTO'ya çevir
+                return await response.Content.ReadFromJsonAsync<VenueDto>();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"VenueService request failed: {ex.Message}");
                 return null;
             }
         }
 
+        // 2. Mekan Var mı?
+        public async Task<bool> VenueExistsAsync(Guid venueId)
+        {
+            var venue = await GetVenueAsync(venueId);
+            return venue != null;
+        }
+
+        // 3. Interface Uyumluluğu
+        public async Task<bool> CheckVenueExistsAsync(Guid venueId)
+        {
+            return await VenueExistsAsync(venueId);
+        }
+
+        // 4. Mekan Sahibini Getir
         public async Task<Guid> GetVenueOwnerAsync(Guid venueId)
         {
-            try
-            {
-                // Gerçek senaryoda, VenueService'in ilgili endpoint'ini çağırırız.
-                // Örneğin: var venue = await GetVenueAsync(venueId);
-                // return venue?.OwnerId ?? Guid.Empty;
+            var venue = await GetVenueAsync(venueId);
+            if (venue == null) return Guid.Empty;
 
-                // ŞİMDİLİK, VenueService hazır olmadığı için, test amacıyla boş Guid döndürelim.
-                return await Task.FromResult(Guid.Empty);
-            }
-            catch
-            {
-                return Guid.Empty;
-            }
+            return venue.OwnerId;
         }
     }
 }

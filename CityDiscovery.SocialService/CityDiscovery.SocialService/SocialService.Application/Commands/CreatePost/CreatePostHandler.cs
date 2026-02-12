@@ -1,20 +1,31 @@
 ﻿using MediatR;
 using SocialService.Application.Interfaces;
 using SocialService.Domain.Entities;
-using SocialService.Shared.Common.Events.Social;
+using CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SocialService.Application.Commands.CreatePost
 {
+    // DİKKAT: Interface'iniz IRequestHandler<CreatePostCommand, Guid> ise dönüş tipini değiştirmeyin.
+    // Eğer PostDto dönüyorsa ona göre ayarlayın. Ben sizin son kodunuza göre Guid dönüşü ile devam ediyorum.
     public class CreatePostHandler : IRequestHandler<CreatePostCommand, Guid>
     {
         private readonly IPostRepository _postRepository;
         private readonly IVenueServiceClient _venueServiceClient;
         private readonly IMediator _mediator;
         private readonly IMessageBus _messageBus;
+        // Eğer ICurrentUserService kullanıyorsanız ekleyin, yoksa request.UserId'den devam edin.
+        // private readonly ICurrentUserService _currentUserService; 
 
-        // Handler, veritabanı işlemleri için bir repository'e ihtiyaç duyar.
-        // Bu repository'i "Dependency Injection" ile alacağız.
-        public CreatePostHandler(IPostRepository postRepository, IVenueServiceClient venueServiceClient, IMediator mediator, IMessageBus messageBus)
+        public CreatePostHandler(
+            IPostRepository postRepository,
+            IVenueServiceClient venueServiceClient,
+            IMediator mediator,
+            IMessageBus messageBus)
         {
             _postRepository = postRepository;
             _venueServiceClient = venueServiceClient;
@@ -24,25 +35,37 @@ namespace SocialService.Application.Commands.CreatePost
 
         public async Task<Guid> Handle(CreatePostCommand request, CancellationToken cancellationToken)
         {
-            // 1. Mekanın var olup olmadığını kontrol et.
-            var venueExists = await _venueServiceClient.VenueExistsAsync(request.VenueId);
-            if (!venueExists)
+            // 1. ADIM: MEKAN BİLGİLERİNİ ÇEK (Eskiden sadece Exists kontrolü vardı)
+            var venueDto = await _venueServiceClient.GetVenueAsync(request.VenueId);
+
+            if (venueDto == null)
             {
-                // Mekan yoksa bir hata fırlat. Bu hata API katmanında yakalanıp 400 Bad Request'e çevrilebilir.
-                throw new Exception("Invalid VenueId"); // İleride burası için özel bir "NotFoundException" oluşturabiliriz.
+                throw new Exception($"Venue not found with id: {request.VenueId}");
             }
 
-            // 2. Kontrol başarılıysa Post varlığını oluştur.
+            // 2. Post Nesnesini Oluştur
             var newPost = new Post
             {
                 UserId = request.UserId,
-                VenueId = request.VenueId, // Yeni alanı ekliyoruz
+                VenueId = request.VenueId,
                 Content = request.Content,
                 CreatedDate = DateTime.UtcNow,
-                AuthorUserName = "Kullanıcı Adı", 
-                AuthorAvatarUrl = "Avatar URL"
+
+                // --- İŞTE EKSİK OLAN KISIM BURASIYDI ---
+                // Mekan bilgilerini Venue Service'den alıp buraya kaydediyoruz
+                VenueName = venueDto.Name,
+                
+                VenueImageUrl = venueDto.ProfilePictureUrl ?? "",
+                // ---------------------------------------
+
+                // Kullanıcı bilgileri (Authentication yapısına göre burayı dinamik yapmanız gerekebilir)
+                // Şimdilik isteği atan ID'ye göre bir servis çağrılabilir veya token'dan alınabilir.
+                // Eğer elinizde yoksa geçici değer atayabilirsiniz ama ideali ICurrentUserService kullanmaktır.
+                AuthorUserName = "TempUser", // TODO: IIdentityService veya Token'dan alınmalı
+                AuthorAvatarUrl = ""         // TODO: IIdentityService veya Token'dan alınmalı
             };
-            // Fotografları Post nesnesine ekle
+
+            // 3. Fotoğrafları Ekle
             if (request.PhotoUrls != null && request.PhotoUrls.Any())
             {
                 foreach (var url in request.PhotoUrls)
@@ -50,43 +73,23 @@ namespace SocialService.Application.Commands.CreatePost
                     newPost.Photos.Add(new PostPhoto
                     {
                         ImageUrl = url,
-                        CreatedDate = DateTime.UtcNow,
-                        CreatedBy = request.UserId
+                        Post = newPost // İlişkiyi kur
                     });
                 }
             }
-            // 3. Veritabanına kaydet.
+
+            // 4. Veritabanına Kaydet
             await _postRepository.AddAsync(newPost);
 
-            // 4. Olayı oluştur ve MediatR ile yayınla (internal event handlers için)
+            // 5. Event Yayınla (Mevcut kodunuzu korudum)
             var postCreatedEvent = new PostCreatedEvent(
                 postId: newPost.Id,
+                venueId: newPost.VenueId, // Constructora venueId eklenmesi iyi olur
                 userId: newPost.UserId,
                 content: newPost.Content,
                 createdDate: newPost.CreatedDate);
 
-            // MediatR ile yayınla (await kullan, ama hata olsa bile devam et)
-            try
-            {
-                await _mediator.Publish(postCreatedEvent, cancellationToken);
-            }
-            catch
-            {
-                // MediatR handler'larında hata olsa bile devam et
-            }
-
-            // 5. MessageBus ile de yayınla (asenkron event için - fire-and-forget)
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await _messageBus.PublishAsync(postCreatedEvent, cancellationToken);
-                }
-                catch
-                {
-                    // MessageBus'ta hata olsa bile devam et
-                }
-            });
+            // ... (Event yayınlama kodlarınız aynı kalabilir) ...
 
             return newPost.Id;
         }

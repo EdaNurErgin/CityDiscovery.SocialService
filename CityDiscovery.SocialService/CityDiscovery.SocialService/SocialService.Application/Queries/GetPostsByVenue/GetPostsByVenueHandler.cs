@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MediatR;
 using SocialService.Application.Interfaces;
-using SocialService.Shared.Common.DTOs.Social;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +31,9 @@ namespace SocialService.Application.Queries.GetPostsByVenue
                 PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(),
                 LikeCount = post.Likes?.Count ?? 0,
                 CommentCount = post.Comments?.Count ?? 0,
-                CreatedAt = post.CreatedDate
+                CreatedAt = post.CreatedDate,
+                VenueName = post.VenueName,          
+                VenueImageUrl = post.VenueImageUrl
             }).ToList();
         }
     }

@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social;
+using MediatR;
 using Microsoft.Extensions.Logging;
-using SocialService.Shared.Common.Events.Social;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

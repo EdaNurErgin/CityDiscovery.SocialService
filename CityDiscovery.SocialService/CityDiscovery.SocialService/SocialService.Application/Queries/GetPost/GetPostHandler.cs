@@ -1,7 +1,7 @@
-﻿using MediatR;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MediatR;
 using SocialService.Application.Interfaces;
 using SocialService.Infrastructure.Repositories;
-using SocialService.Shared.Common.DTOs.Social;
 
 namespace SocialService.Application.Queries.GetPost
 {

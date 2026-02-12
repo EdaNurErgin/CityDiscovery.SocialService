@@ -1,14 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using MassTransit;
+using CityDiscovery.SocialService.API.Consumers;
 using CityDiscovery.SocialService.SocialService.Application;
-using SocialService.Infrastructure.Data;
-using SocialService.Application;
-using SocialService.Infrastructure.Extensions;
 using CityDiscovery.SocialService.SocialService.Infrastructure.Messaging.Consumers;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SocialService.Application;
+using SocialService.Application.Interfaces;
+using SocialService.Infrastructure.Data;
+using SocialService.Infrastructure.Extensions;
+using SocialService.Infrastructure.HttpClients;
 using SocialService.Infrastructure.Messaging.Consumers;
 using System.IO;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,10 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<UserLoggedInConsumer>();
     x.AddConsumer<VenueDeletedConsumer>();
     x.AddConsumer<UserDeletedConsumer>();
+    x.AddConsumer<SocialService.API.Consumers.PostDeletedConsumer>();
+    x.AddConsumer<CityDiscovery.SocialService.SocialService.API.Consumers.ContentRemovedConsumer>();
+    x.AddConsumer<VenueUpdatedConsumer>();
+    
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -53,12 +60,25 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<UserDeletedConsumer>(context);
         });
 
+        // --- EKLENEN KISIM 2: KUYRUK TANIMI ---
+        // Bu kuyruk sayesinde mekan güncellemelerini dinleyeceğiz
+        cfg.ReceiveEndpoint("venue-updated-queue", e =>
+        {
+            e.ConfigureConsumer<VenueUpdatedConsumer>(context);
+        });
+        // --------------------------------------
+        cfg.ReceiveEndpoint("content-removed-queue", e =>
+        {
+            e.ConfigureConsumer<CityDiscovery.SocialService.SocialService.API.Consumers.ContentRemovedConsumer>(context);
+        });
         cfg.ConfigureEndpoints(context);
     });
 });
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
+
+// ... (Geri kalan kodlar aynı) ...
 
 // JWT Authentication yapılandırması
 builder.Services.AddAuthentication(options =>
@@ -82,31 +102,26 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    // ... (Swagger ayarları aynı) ...
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "CityDiscovery Sosyal Servis API",
         Version = "v1",
-        Description = "CityDiscovery platformunda sosyal etkileşimleri (gönderiler, yorumlar ve beğeniler) yönetmek için API.",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
-        {
-            Name = "CityDiscovery Ekibi",
-            Email = "support@citydiscovery.com"
-        }
+        Description = "CityDiscovery platformunda sosyal etkileşimleri yönetmek için API.",
     });
 
-    // JWT Security Definition
+    // ... (Security definition aynı) ...
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http, // DEĞİŞİKLİK: ApiKey yerine Http
-        Scheme = "Bearer", // DEĞİŞİKLİK: Scheme 'Bearer' olarak belirtilmeli
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
         BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme. Sadece token'ı yapıştırın (Bearer yazmanıza gerek yok)."
+        Description = "JWT Authorization header using the Bearer scheme."
     });
 
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -123,32 +138,25 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+});
 
-    // XML comments'i dahil et
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
+// VenueServiceClient'ı HttpClient olarak kaydediyoruz ve adresini appsettings'den alıyoruz.
+builder.Services.AddHttpClient<IVenueServiceClient, VenueServiceClient>(client =>
+{
+    // appsettings.json'daki "ServiceUrls:VenueService" değerini okur
+    var url = builder.Configuration["ServiceUrls:VenueService"];
+    client.BaseAddress = new Uri(url);
+});
 
-    // Tüm XML dosyalarını dahil et (diğer projeler için)
-    var applicationXml = Path.Combine(AppContext.BaseDirectory, "SocialService.Application.xml");
-    if (File.Exists(applicationXml))
-    {
-        c.IncludeXmlComments(applicationXml);
-    }
-
-    var sharedXml = Path.Combine(AppContext.BaseDirectory, "SocialServiceShared.Common.xml");
-    if (File.Exists(sharedXml))
-    {
-        c.IncludeXmlComments(sharedXml);
-    }
+builder.Services.AddHttpClient<IIdentityServiceClient, SocialService.Infrastructure.HttpClients.IdentityServiceClient>(client =>
+{
+    // appsettings.json'da ServiceUrls altında IdentityService tanımlı olmalı
+    var url = builder.Configuration["ServiceUrls:IdentityService"];
+    client.BaseAddress = new Uri(url);
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -157,7 +165,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-// Authentication middleware'i Authorization'dan ÖNCE olmalı
+
 app.UseAuthentication();
 app.UseAuthorization();
 

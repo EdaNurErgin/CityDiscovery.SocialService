@@ -12,21 +12,20 @@ namespace SocialService.Infrastructure.Repositories
     public class PostRepository : IPostRepository
     {
         private readonly SocialDbContext _context;
+
         public PostRepository(SocialDbContext context)
         {
             _context = context;
         }
+
         public async Task AddAsync(Post post)
         {
-            // DbContext'in Posts setine yeni post'u ekle
             await _context.Posts.AddAsync(post);
-            // Değişiklikleri veritabanına kaydet
             await _context.SaveChangesAsync();
         }
 
         public async Task<Post> GetByIdAsync(Guid id)
         {
-            // Post'u bulurken, ilişkili olduğu yorumları, beğenileri ve fotoğrafları da getirmesini istiyoruz.
             return await _context.Posts
                 .Include(p => p.Comments)
                 .Include(p => p.Likes)
@@ -36,7 +35,6 @@ namespace SocialService.Infrastructure.Repositories
 
         public async Task<List<Post>> GetByVenueIdAsync(Guid venueId)
         {
-            // Venue'ye ait post'ları bulurken, ilişkili olduğu yorumları, beğenileri ve fotoğrafları da getirmesini istiyoruz.
             return await _context.Posts
                 .Where(p => p.VenueId == venueId)
                 .Include(p => p.Comments)
@@ -73,10 +71,10 @@ namespace SocialService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        // Mevcut metodların altına ekle:
         public async Task UpdateAuthorDetailsAsync(Guid userId, string newUserName, string newAvatarUrl)
         {
-            // 1. DÜZELTME: AuthorUserId yerine UserId kullanıldı
+            // Kullanıcıya ait tüm postları bul ve güncelle (Bulk update alternatifi)
+            // Not: ExecuteUpdateAsync burada da kullanılabilir ama logic karmaşıksa bu yöntem kalabilir.
             var posts = await _context.Posts
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
@@ -85,13 +83,54 @@ namespace SocialService.Infrastructure.Repositories
             {
                 foreach (var post in posts)
                 {
-                    // 2. GÜNCELLEME: Artık entity'de bu alanlar var, güncelleyebiliriz.
                     post.AuthorUserName = newUserName;
                     post.AuthorAvatarUrl = newAvatarUrl;
                 }
-
                 await _context.SaveChangesAsync();
             }
+        }
+
+
+
+        // PostRepository sınıfının içine ekleyin:
+
+        public async Task UpdateVenueDetailsAsync(Guid venueId, string newVenueName, string newVenueImageUrl)
+        {
+            // Bu mekana ait tüm postları bul
+            var posts = await _context.Posts
+                .Where(p => p.VenueId == venueId)
+                .ToListAsync();
+
+            if (posts.Any())
+            {
+                foreach (var post in posts)
+                {
+                    // Denormalize edilmiş alanları güncelle
+                    post.VenueName = newVenueName;
+                    post.VenueImageUrl = newVenueImageUrl;
+                }
+
+                // Toplu kaydet
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // PostRepository sınıfının içine:
+
+        public async Task DeleteAsync(Guid id)
+        {
+            // 1. Önce silinecek postu bul
+            var post = await _context.Posts.FindAsync(id);
+
+            // 2. Eğer post varsa sil
+            if (post != null)
+            {
+                _context.Posts.Remove(post);
+
+                // 3. Değişiklikleri kaydet
+                await _context.SaveChangesAsync();
+            }
+            // Post zaten yoksa hata vermesine gerek yok, işlem başarılı sayılabilir.
         }
     }
 }

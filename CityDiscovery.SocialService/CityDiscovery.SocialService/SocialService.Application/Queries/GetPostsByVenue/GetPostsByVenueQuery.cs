@@ -1,5 +1,5 @@
-﻿using MediatR;
-using SocialService.Shared.Common.DTOs.Social;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MediatR;
 using System;
 using System.Collections.Generic;
 

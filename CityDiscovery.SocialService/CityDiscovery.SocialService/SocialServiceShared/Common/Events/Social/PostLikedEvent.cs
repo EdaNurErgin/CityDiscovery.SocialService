@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SocialService.Shared.Common.Events.Social
+namespace CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social
 {
     public class PostLikedEvent
     {

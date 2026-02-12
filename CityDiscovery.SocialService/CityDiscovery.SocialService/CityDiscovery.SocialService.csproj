@@ -33,7 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="SocialService.API\Services\" />
     <Folder Include="SocialService.Application\Behaviors\" />
+    <Folder Include="wwwroot\uploads\posts\" />
   </ItemGroup>
 
 </Project>

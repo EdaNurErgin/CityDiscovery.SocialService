@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocialService.Shared.Common.DTOs.Social
+namespace CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social
 {
     /// <summary>
     /// Gönderi için veri transfer nesnesi
@@ -58,5 +58,8 @@ namespace SocialService.Shared.Common.DTOs.Social
         /// </summary>
         /// <example>2024-01-15T10:30:00Z</example>
         public DateTime CreatedAt { get; set; }
+
+        public string VenueName { get; set; }      // Mekan Adı
+        public string VenueImageUrl { get; set; }  // Mekan Resmi
     }
 }

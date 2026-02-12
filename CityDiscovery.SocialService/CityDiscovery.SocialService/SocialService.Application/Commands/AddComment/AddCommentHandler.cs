@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using SocialService.Application.Interfaces;
 using SocialService.Domain.Entities;
-using SocialService.Shared.Common.Events.Social;
+using CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SocialService.Shared.Common.DTOs.Social
+namespace CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social
 {
     public class CommentDto
     {

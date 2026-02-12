@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CityDiscovery.SocialService.SocialService.Application.DTOs;
+using System;
 using System.Threading.Tasks;
 
 namespace SocialService.Application.Interfaces
@@ -11,10 +12,5 @@ namespace SocialService.Application.Interfaces
         Task<Guid> GetVenueOwnerAsync(Guid venueId);
     }
 
-    public class VenueDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public Guid OwnerId { get; set; }
-    }
+
 }

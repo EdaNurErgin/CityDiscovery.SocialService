@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,6 @@ using SocialService.Application.Interfaces;
 using SocialService.Application.Queries.GetPost;
 using SocialService.Application.Queries.GetPostLikeCount;
 using SocialService.Application.Queries.GetPostsByVenue;
-using SocialService.Shared.Common.DTOs.Social;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

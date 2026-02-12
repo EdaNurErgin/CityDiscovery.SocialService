@@ -11,6 +11,8 @@ namespace SocialService.Domain.Entities
         public string Content { get; set; }
         public DateTime CreatedDate { get; set; }
         public Guid VenueId { get; set; }
+        public string VenueName { get; set; }
+        public string VenueImageUrl { get; set; }
         public ICollection<PostComment> Comments { get; set; } = new List<PostComment>();
         public ICollection<PostLike> Likes { get; set; } = new List<PostLike>();
         public ICollection<PostPhoto> Photos { get; set; } = new List<PostPhoto>();

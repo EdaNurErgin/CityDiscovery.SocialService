@@ -1,6 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MassTransit.Mediator;
 using MediatR;
-using SocialService.Shared.Common.DTOs.Social;
 
 namespace SocialService.Application.Queries.GetPost
 {

@@ -1,9 +1,9 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Logging;
 using SocialService.Application.Interfaces;
-using CityDiscovery.VenueService.VenuesService.Shared.Common.Events.Venue;
 using System;
 using System.Threading.Tasks;
+using CityDiscovery.VenueService.VenuesService.Shared.Common.Events.Venue;
 
 namespace SocialService.Infrastructure.Messaging.Consumers
 {

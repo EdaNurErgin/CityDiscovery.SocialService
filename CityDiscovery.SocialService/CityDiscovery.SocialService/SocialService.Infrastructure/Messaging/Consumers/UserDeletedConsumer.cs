@@ -1,7 +1,7 @@
-﻿using MassTransit;
+﻿using IdentityService.Shared.MessageBus.Identity;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using SocialService.Application.Interfaces;
-using SocialService.Shared.Common.Events.Identity;
 using System;
 using System.Threading.Tasks;
 
