@@ -155,6 +155,9 @@ builder.Services.AddHttpClient<IIdentityServiceClient, SocialService.Infrastruct
     client.BaseAddress = new Uri(url);
 });
 
+// Health Checks
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -168,6 +171,9 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Health Check Endpoint
+app.MapHealthChecks("/health");
 
 app.MapControllers();
 
