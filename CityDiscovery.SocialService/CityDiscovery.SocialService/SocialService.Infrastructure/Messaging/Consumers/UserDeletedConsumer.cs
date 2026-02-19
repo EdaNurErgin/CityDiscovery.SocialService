@@ -5,7 +5,7 @@ using SocialService.Application.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace SocialService.Infrastructure.Messaging.Consumers
+namespace CityDiscovery.SocialService.Infrastructure.Messaging.Consumers
 {
     public class UserDeletedConsumer : IConsumer<UserDeletedEvent>
     {
@@ -22,25 +22,30 @@ namespace SocialService.Infrastructure.Messaging.Consumers
         {
             var message = context.Message;
 
+            // DÜZELTME 1: Property ismi 'DeletedAt' yerine 'DeletedAtUtc' olmalı
             _logger.LogInformation(
-                "User deleted event received - UserId: {UserId}, DeletedAt: {DeletedAt}",
+                "SocialService: Kullanıcı silme eventi alındı. User: {UserName} ({UserId}), Silinme Zamanı: {DeletedAt}",
+                message.UserName, // Artık UserName bilgisine de erişebilirsiniz
                 message.UserId,
-                message.DeletedAt);
+                message.DeletedAtUtc);
 
             try
             {
                 // User silindiğinde, o user'a ait tüm post'ları sil
+                // DÜZELTME 2: Bu metodun IPostRepository'de tanımlı olduğundan emin olun
                 await _postRepository.DeletePostsByUserIdAsync(message.UserId);
 
                 _logger.LogInformation(
-                    "Successfully deleted all posts for user - UserId: {UserId}",
+                    "SocialService: Kullanıcıya ait tüm postlar başarıyla silindi - UserId: {UserId}",
                     message.UserId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "Error occurred while deleting posts for user - UserId: {UserId}",
+                    "SocialService: Post silme işlemi sırasında hata oluştu - UserId: {UserId}",
                     message.UserId);
+
+                // Hata fırlatarak mesajın retry kuyruğuna düşmesini sağlayabilirsiniz
                 throw;
             }
         }

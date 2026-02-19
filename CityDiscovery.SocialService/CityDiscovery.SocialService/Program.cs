@@ -1,5 +1,5 @@
 using CityDiscovery.SocialService.API.Consumers;
-using CityDiscovery.SocialService.SocialService.Application;
+using CityDiscovery.SocialService.Infrastructure.Messaging.Consumers;
 using CityDiscovery.SocialService.SocialService.Infrastructure.Messaging.Consumers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +11,6 @@ using SocialService.Infrastructure.Data;
 using SocialService.Infrastructure.Extensions;
 using SocialService.Infrastructure.HttpClients;
 using SocialService.Infrastructure.Messaging.Consumers;
-using System.IO;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,7 +59,7 @@ builder.Services.AddMassTransit(x =>
             e.ConfigureConsumer<UserDeletedConsumer>(context);
         });
 
-        // --- EKLENEN KISIM 2: KUYRUK TANIMI ---
+        
         // Bu kuyruk sayesinde mekan güncellemelerini dinleyeceğiz
         cfg.ReceiveEndpoint("venue-updated-queue", e =>
         {
@@ -78,7 +77,7 @@ builder.Services.AddMassTransit(x =>
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 
-// ... (Geri kalan kodlar aynı) ...
+
 
 // JWT Authentication yapılandırması
 builder.Services.AddAuthentication(options =>
@@ -105,7 +104,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // ... (Swagger ayarları aynı) ...
+   
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "CityDiscovery Sosyal Servis API",
@@ -113,7 +112,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "CityDiscovery platformunda sosyal etkileşimleri yönetmek için API.",
     });
 
-    // ... (Security definition aynı) ...
+  
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
