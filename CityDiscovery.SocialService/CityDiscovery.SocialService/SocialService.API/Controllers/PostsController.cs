@@ -8,6 +8,7 @@ using SocialService.Application.Commands.CreatePost;
 using SocialService.Application.Interfaces;
 using SocialService.Application.Queries.GetPost;
 using SocialService.Application.Queries.GetPostLikeCount;
+using SocialService.Application.Queries.GetPostsByUser;
 using SocialService.Application.Queries.GetPostsByVenue;
 using System;
 using System.Collections.Generic;
@@ -58,40 +59,6 @@ namespace SocialService.API.Controllers
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreatePost([FromForm] CreatePostRequest request)
         {
-            //try
-            //{
-            //    // 1. Fotoğrafları kaydet ve URL listesi oluştur
-            //    var photoUrls = new List<string>();
-
-            //    if (request.Photos != null && request.Photos.Count > 0)
-            //    {
-            //        foreach (var file in request.Photos)
-            //        {
-            //            var savedPath = await _imageService.SaveImageAsync(file);
-            //            if (!string.IsNullOrEmpty(savedPath))
-            //            {
-            //                photoUrls.Add(savedPath);
-            //            }
-            //        }
-            //    }
-
-            //    // 2. Command oluştur (Resim URL'leri ile)
-            //    var command = new CreatePostCommand
-            //    {
-            //        UserId = request.UserId,
-            //        VenueId = request.VenueId,
-            //        Content = request.Content,
-            //        PhotoUrls = photoUrls // Kaydedilen resimlerin yollarını aktar
-            //    };
-
-            //    var postId = await _mediator.Send(command);
-
-            //    return CreatedAtAction(nameof(GetPostById), new { id = postId }, new { id = postId });
-            //}
-            //catch (Exception ex)
-            //{
-            //    return BadRequest(new { error = ex.Message });
-            //}
 
             try
             {
@@ -111,7 +78,7 @@ namespace SocialService.API.Controllers
                     finalUserId = request.UserId;
                 }
 
-                // 2. Fotoğrafları kaydetme işlemleri (mevcut kodunuz)
+                // 2. Fotoğrafları kaydetme işlemleri 
                 var photoUrls = new List<string>();
                 if (request.Photos != null && request.Photos.Count > 0)
                 {
@@ -228,6 +195,22 @@ namespace SocialService.API.Controllers
         {
             var likeCount = await _mediator.Send(new GetPostLikeCountQuery { PostId = postId });
             return Ok(new { postId, likeCount });
+        }
+
+
+        /// <summary>
+        /// Belirli bir kullanıcıya ait tüm gönderileri getirir
+        /// </summary>
+        /// <param name="userId">Kullanıcı ID'si</param>
+        /// <returns>Kullanıcıya ait gönderi listesi</returns>
+        /// <response code="200">Gönderiler başarıyla getirildi</response>
+        [HttpGet("by-user/{userId}")]
+        [ProducesResponseType(typeof(List<PostDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPostsByUser(Guid userId)
+        {
+            var query = new GetPostsByUserQuery { UserId = userId };
+            var posts = await _mediator.Send(query);
+            return Ok(posts);
         }
     }
 }

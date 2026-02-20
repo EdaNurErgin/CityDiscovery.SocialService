@@ -44,12 +44,12 @@ namespace SocialService.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<Post>> GetByUserIdAsync(Guid userId)
-        {
-            return await _context.Posts
-                .Where(p => p.UserId == userId)
-                .ToListAsync();
-        }
+        //public async Task<List<Post>> GetByUserIdAsync(Guid userId)
+        //{
+        //    return await _context.Posts
+        //        .Where(p => p.UserId == userId)
+        //        .ToListAsync();
+        //}
 
         public async Task DeletePostsByVenueIdAsync(Guid venueId)
         {
@@ -132,5 +132,21 @@ namespace SocialService.Infrastructure.Repositories
             }
             // Post zaten yoksa hata vermesine gerek yok, işlem başarılı sayılabilir.
         }
+
+
+        
+
+        public async Task<List<Post>> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.Posts
+                .Where(p => p.UserId == userId)
+                .Include(p => p.Comments)
+                .Include(p => p.Likes)
+                .Include(p => p.Photos)
+                .OrderByDescending(p => p.CreatedDate) // En yeni postlar en üstte görünsün
+                .ToListAsync();
+        }
+
+
     }
 }

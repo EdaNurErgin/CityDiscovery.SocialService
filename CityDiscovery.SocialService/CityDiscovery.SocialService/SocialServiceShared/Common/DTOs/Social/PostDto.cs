@@ -29,6 +29,9 @@ namespace CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social
         /// <example>3fa85f64-5717-4562-b3fc-2c963f66afa6</example>
         public Guid AuthorUserId { get; set; }
 
+        public string AuthorUserName { get; set; }
+        public string AuthorAvatarUrl { get; set; }
+
         /// <summary>
         /// Gönderi açıklaması/içeriği
         /// </summary>
