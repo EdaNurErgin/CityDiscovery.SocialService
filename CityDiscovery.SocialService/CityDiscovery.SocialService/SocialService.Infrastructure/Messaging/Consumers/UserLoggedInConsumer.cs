@@ -25,13 +25,7 @@ namespace CityDiscovery.SocialService.SocialService.Infrastructure.Messaging.Con
                 message.DeviceId,
                 message.LoggedInAtUtc);
 
-            // TODO: SocialService'in yapması gereken işlemler
-            // Örnekler:
-            // - Kullanıcı için feed hazırla
-            // - Takip listesi oluştur
-            // - Kullanıcı aktivite kaydı oluştur
-            // - Cache'i güncelle
-            // - vb.
+
 
             await Task.CompletedTask;
         }

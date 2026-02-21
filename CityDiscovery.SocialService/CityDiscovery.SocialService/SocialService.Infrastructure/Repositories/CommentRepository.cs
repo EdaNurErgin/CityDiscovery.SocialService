@@ -2,10 +2,7 @@
 using SocialService.Application.Interfaces;
 using SocialService.Domain.Entities;
 using SocialService.Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace SocialService.Infrastructure.Repositories
 {
@@ -16,7 +13,7 @@ namespace SocialService.Infrastructure.Repositories
         {
             _context = context;
         }
-        
+
         public async Task AddAsync(PostComment comment)
         {
             await _context.PostComments.AddAsync(comment);
@@ -35,6 +32,16 @@ namespace SocialService.Infrastructure.Repositories
         {
             return await _context.PostComments
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        
+        public async Task UpdateAuthorDetailsAsync(Guid userId, string newUserName, string? newAvatarUrl)
+        {
+            await _context.PostComments
+                .Where(c => c.UserId == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(c => c.AuthorUserName, newUserName)
+                    .SetProperty(c => c.AuthorAvatarUrl, newAvatarUrl));
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using CityDiscovery.AdminNotificationService.Shared.Common.Events.AdminNotification;
 using SocialService.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore; // FindAsync için gerekli olabilir
+
 
 namespace CityDiscovery.SocialService.SocialService.API.Consumers
 {

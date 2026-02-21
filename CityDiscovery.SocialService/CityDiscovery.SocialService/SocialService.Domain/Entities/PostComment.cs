@@ -13,5 +13,7 @@ namespace SocialService.Domain.Entities
         public Guid UserId { get; set; }
         public Post Post { get; set; }
         public string Content { get; set; }
+        public string? AuthorUserName { get; set; }
+        public string? AuthorAvatarUrl { get; set; }
     }
 }

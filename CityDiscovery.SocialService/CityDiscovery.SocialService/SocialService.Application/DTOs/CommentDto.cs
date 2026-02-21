@@ -30,6 +30,16 @@ namespace SocialService.Application.DTOs
         public Guid UserId { get; set; }
 
         /// <summary>
+        /// Yorum yazarının kullanıcı adı
+        /// </summary>
+        public string? AuthorUserName { get; set; }
+
+        /// <summary>
+        /// Yorum yazarının profil fotoğrafı URL'i
+        /// </summary>
+        public string? AuthorAvatarUrl { get; set; }
+
+        /// <summary>
         /// Yorum içeriği
         /// </summary>
         /// <example>Harika bir gönderi! Çok beğendim.</example>

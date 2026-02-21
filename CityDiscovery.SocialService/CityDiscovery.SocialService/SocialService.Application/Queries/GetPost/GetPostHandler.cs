@@ -1,7 +1,7 @@
 ﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
 using MediatR;
 using SocialService.Application.Interfaces;
-using SocialService.Infrastructure.Repositories;
+
 
 namespace SocialService.Application.Queries.GetPost
 {
@@ -18,10 +18,10 @@ namespace SocialService.Application.Queries.GetPost
 
             if (post == null)
             {
-                // Gönderi bulunamazsa null dönebiliriz veya bir exception fırlatabiliriz.
-                // Şimdilik null dönelim. Controller bunu 404 Not Found olarak yorumlayacak.
+
                 return null;
             }
+
 
             // Post varlığını PostDto'ya dönüştürüyoruz (map'leme).
             var postDto = new PostDto
@@ -29,6 +29,11 @@ namespace SocialService.Application.Queries.GetPost
                 Id = post.Id,
                 VenueId = post.VenueId,
                 AuthorUserId = post.UserId,
+                AuthorUserName = post.AuthorUserName,
+                AuthorAvatarUrl = post.AuthorAvatarUrl,
+                VenueName = post.VenueName, 
+                VenueImageUrl = post.VenueImageUrl,
+
                 Caption = post.Content,
                 PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(),
                 LikeCount = post.Likes?.Count ?? 0,

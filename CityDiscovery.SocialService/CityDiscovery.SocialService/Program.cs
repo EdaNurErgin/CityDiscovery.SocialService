@@ -28,7 +28,9 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SocialService.API.Consumers.PostDeletedConsumer>();
     x.AddConsumer<CityDiscovery.SocialService.SocialService.API.Consumers.ContentRemovedConsumer>();
     x.AddConsumer<VenueUpdatedConsumer>();
-    
+
+    x.AddConsumer<UserUpdatedConsumer>();
+
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -69,6 +71,11 @@ builder.Services.AddMassTransit(x =>
         cfg.ReceiveEndpoint("content-removed-queue", e =>
         {
             e.ConfigureConsumer<CityDiscovery.SocialService.SocialService.API.Consumers.ContentRemovedConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("social-user-updated-queue", e =>
+        {
+            e.ConfigureConsumer<UserUpdatedConsumer>(context);
         });
         cfg.ConfigureEndpoints(context);
     });

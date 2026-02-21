@@ -27,12 +27,14 @@ namespace SocialService.Application.Queries.GetPostsByVenue
                 Id = post.Id,
                 VenueId = post.VenueId,
                 AuthorUserId = post.UserId,
+                AuthorUserName = post.AuthorUserName,
+                AuthorAvatarUrl = post.AuthorAvatarUrl,
                 Caption = post.Content,
                 PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(),
                 LikeCount = post.Likes?.Count ?? 0,
                 CommentCount = post.Comments?.Count ?? 0,
                 CreatedAt = post.CreatedDate,
-                VenueName = post.VenueName,          
+                VenueName = post.VenueName,
                 VenueImageUrl = post.VenueImageUrl
             }).ToList();
         }

@@ -2,9 +2,7 @@
 using SocialService.Application.Interfaces;
 using SocialService.Domain.Entities;
 using CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace SocialService.Application.Commands.AddComment
 {
@@ -13,12 +11,18 @@ namespace SocialService.Application.Commands.AddComment
         private readonly ICommentRepository _commentRepository;
         private readonly IPostRepository _postRepository;
         private readonly IMessageBus _messageBus;
+        private readonly IIdentityServiceClient _identityServiceClient; 
 
-        public AddCommentHandler(ICommentRepository commentRepository, IPostRepository postRepository, IMessageBus messageBus)
+        public AddCommentHandler(
+            ICommentRepository commentRepository,
+            IPostRepository postRepository,
+            IMessageBus messageBus,
+            IIdentityServiceClient identityServiceClient) 
         {
             _commentRepository = commentRepository;
             _postRepository = postRepository;
             _messageBus = messageBus;
+            _identityServiceClient = identityServiceClient; 
         }
 
         public async Task<Guid> Handle(AddCommentCommand request, CancellationToken cancellationToken)
@@ -30,12 +34,22 @@ namespace SocialService.Application.Commands.AddComment
                 throw new Exception("Post not found");
             }
 
+            // Kullanıcı bilgilerini IdentityService'den çek (EKLENDİ)
+            var userDto = await _identityServiceClient.GetUserAsync(request.UserId);
+            if (userDto == null)
+            {
+                throw new Exception($"User not found with id: {request.UserId}");
+            }
+
             var comment = new PostComment
             {
                 PostId = request.PostId,
                 UserId = request.UserId,
                 Content = request.Content,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                AuthorUserName = userDto.UserName,
+                AuthorAvatarUrl = userDto.AvatarUrl ?? ""
+                // ---------------------------------------------
             };
 
             await _commentRepository.AddAsync(comment);

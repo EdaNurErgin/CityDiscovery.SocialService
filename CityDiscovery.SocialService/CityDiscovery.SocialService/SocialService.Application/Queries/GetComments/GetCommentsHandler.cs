@@ -2,10 +2,7 @@
 using SocialService.Application.DTOs;
 using SocialService.Application.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace SocialService.Application.Queries.GetComments
 {
@@ -27,6 +24,8 @@ namespace SocialService.Application.Queries.GetComments
                 Id = c.Id,
                 PostId = c.PostId,
                 UserId = c.UserId,
+                AuthorUserName = c.AuthorUserName,
+                AuthorAvatarUrl = c.AuthorAvatarUrl,
                 Content = c.Content,
                 CreatedDate = c.CreatedDate,
                 UpdatedDate = c.LastModifiedDate

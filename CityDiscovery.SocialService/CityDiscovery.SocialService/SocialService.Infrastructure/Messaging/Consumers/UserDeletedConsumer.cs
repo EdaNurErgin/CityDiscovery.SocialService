@@ -1,9 +1,8 @@
 ﻿using IdentityService.Shared.MessageBus.Identity;
 using MassTransit;
-using Microsoft.Extensions.Logging;
 using SocialService.Application.Interfaces;
-using System;
-using System.Threading.Tasks;
+
+
 
 namespace CityDiscovery.SocialService.Infrastructure.Messaging.Consumers
 {
@@ -22,17 +21,17 @@ namespace CityDiscovery.SocialService.Infrastructure.Messaging.Consumers
         {
             var message = context.Message;
 
-            // DÜZELTME 1: Property ismi 'DeletedAt' yerine 'DeletedAtUtc' olmalı
+            
             _logger.LogInformation(
                 "SocialService: Kullanıcı silme eventi alındı. User: {UserName} ({UserId}), Silinme Zamanı: {DeletedAt}",
-                message.UserName, // Artık UserName bilgisine de erişebilirsiniz
+                message.UserName, 
                 message.UserId,
                 message.DeletedAtUtc);
 
             try
             {
                 // User silindiğinde, o user'a ait tüm post'ları sil
-                // DÜZELTME 2: Bu metodun IPostRepository'de tanımlı olduğundan emin olun
+                
                 await _postRepository.DeletePostsByUserIdAsync(message.UserId);
 
                 _logger.LogInformation(
@@ -45,7 +44,7 @@ namespace CityDiscovery.SocialService.Infrastructure.Messaging.Consumers
                     "SocialService: Post silme işlemi sırasında hata oluştu - UserId: {UserId}",
                     message.UserId);
 
-                // Hata fırlatarak mesajın retry kuyruğuna düşmesini sağlayabilirsiniz
+                
                 throw;
             }
         }

@@ -1,7 +1,5 @@
-using System;
 using CityDiscovery.SocialService.SocialServiceShared.Common.Events;
 
-// Namespace yap?s?n? projenizdeki mevcut yap?ya sad?k kalarak korudum
 namespace CityDiscovery.VenueService.VenuesService.Shared.Common.Events.Venue
 {
     public class VenueDeletedEvent : IIntegrationEvent

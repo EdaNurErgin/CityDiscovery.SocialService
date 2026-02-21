@@ -1,6 +1,4 @@
 ﻿using CityDiscovery.SocialService.SocialService.Infrastructure.Messaging;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
 using SocialService.Application.Interfaces;
 using SocialService.Infrastructure.HttpClients;
 using SocialService.Infrastructure.Messaging;

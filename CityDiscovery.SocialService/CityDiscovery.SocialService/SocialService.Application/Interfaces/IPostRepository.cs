@@ -15,5 +15,7 @@ namespace SocialService.Application.Interfaces
         Task UpdateVenueDetailsAsync(Guid venueId, string newVenueName, string newVenueImageUrl);
         Task DeleteAsync(Guid id);
 
+   
+
     }
 }

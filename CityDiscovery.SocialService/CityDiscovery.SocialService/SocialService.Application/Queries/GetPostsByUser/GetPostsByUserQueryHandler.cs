@@ -27,7 +27,7 @@ namespace SocialService.Application.Queries.GetPostsByUser
                 AuthorAvatarUrl = post.AuthorAvatarUrl, 
                 Caption = post.Content, 
                 CreatedAt = post.CreatedDate,
-                PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(), // 'Url' yerine 'ImageUrl' kullanıldı
+                PhotoUrls = post.Photos?.Select(p => p.ImageUrl).ToList() ?? new List<string>(), 
                 LikeCount = post.Likes?.Count ?? 0,
                 CommentCount = post.Comments?.Count ?? 0,
                 VenueName = post.VenueName,
