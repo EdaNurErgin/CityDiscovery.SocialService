@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 
 namespace CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social
 {
@@ -6,16 +6,18 @@ namespace CityDiscovery.SocialService.SocialServiceShared.Common.Events.Social
     {
         public Guid CommentId { get; set; }
         public Guid PostId { get; set; }
+        public Guid PostAuthorUserId { get; set; }
         public Guid UserId { get; set; }
         public string? AuthorUserName { get; set; }
         public string? AuthorAvatarUrl { get; set; }
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public CommentAddedEvent(Guid commentId, Guid postId, Guid userId, string content, DateTime createdAt)
+        public CommentAddedEvent(Guid commentId, Guid postId, Guid postAuthorUserId ,Guid userId, string content, DateTime createdAt)
         {
             CommentId = commentId;
             PostId = postId;
+            PostAuthorUserId = postAuthorUserId;  // postId'den sonra
             UserId = userId;
             Content = content;
             CreatedAt = createdAt;

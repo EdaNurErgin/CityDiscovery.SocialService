@@ -52,10 +52,12 @@ namespace SocialService.Application.Commands.LikePost
 
                 await _likeRepository.AddAsync(like);
 
-                // PostLikedEvent'i MessageBus ile yayınla (fire-and-forget)
+             
+                // PostLikedEvent'e artık PostAuthorUserId de yazılıyor
                 var postLikedEvent = new PostLikedEvent(
                     postId: request.PostId,
-                    userId: request.UserId,
+                    postAuthorUserId: post.UserId,  //  post sahibi
+                    userId: request.UserId,          // Beğenen kişi
                     likedAt: like.LikedDate);
 
                 // Fire-and-forget: Hata olsa bile response'u bekletme

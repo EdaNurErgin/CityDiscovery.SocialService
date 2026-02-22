@@ -58,6 +58,7 @@ namespace SocialService.Application.Commands.AddComment
             var commentAddedEvent = new CommentAddedEvent(
                 commentId: comment.Id,
                 postId: request.PostId,
+                postAuthorUserId: post.UserId,
                 userId: request.UserId,
                 content: request.Content,
                 createdAt: comment.CreatedDate);
