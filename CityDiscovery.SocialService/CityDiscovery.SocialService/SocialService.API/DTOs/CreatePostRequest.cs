@@ -6,7 +6,7 @@ namespace SocialService.API.DTOs
 {
     public class CreatePostRequest
     {
-        public Guid UserId { get; set; }
+      
         public Guid VenueId { get; set; }
         public string Content { get; set; }
 

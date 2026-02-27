@@ -64,18 +64,13 @@ namespace SocialService.API.Controllers
             {
                 // 1. Önce Token içerisinden kullanıcı ID'sini almayı dene
                 // Not: Identity Service'te 'sub' veya 'NameIdentifier' olarak tutulur.
-                var userIdFromClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                // 1. Token içerisinden kullanıcı ID'sini al
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                               ?? User.FindFirst("sub")?.Value;
 
-                Guid finalUserId;
-
-                if (!string.IsNullOrEmpty(userIdFromClaim))
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid finalUserId))
                 {
-                    finalUserId = Guid.Parse(userIdFromClaim);
-                }
-                else
-                {
-                    // Token yoksa veya ID içermiyorsa mevcut manuel ID'yi kullan (Test kolaylığı için)
-                    finalUserId = request.UserId;
+                    return Unauthorized(new { error = "Kullanıcı kimliği doğrulanamadı." });
                 }
 
                 // 2. Fotoğrafları kaydetme işlemleri 

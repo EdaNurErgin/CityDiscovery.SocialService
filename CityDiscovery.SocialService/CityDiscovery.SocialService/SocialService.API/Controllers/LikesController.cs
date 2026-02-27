@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialService.Application.Commands.LikePost;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SocialService.API.Controllers
@@ -27,17 +29,15 @@ namespace SocialService.API.Controllers
         /// Bir gönderiyi beğenir veya beğeniyi kaldırır (toggle)
         /// </summary>
         /// <param name="postId">Gönderi ID'si</param>
-        /// <param name="request">Beğeni isteği (UserId içerir)</param>
         /// <returns>Gönderi ID'si, Kullanıcı ID'si ve gönderinin beğenilip beğenilmediği</returns>
         /// <response code="200">Beğeni durumu başarıyla güncellendi</response>
         /// <response code="400">Geçersiz istek veya gönderi bulunamadı</response>
+        /// <response code="401">Yetkilendirme hatası (Geçersiz Token)</response>
         /// <remarks>
         /// Örnek istek:
         /// 
         ///     POST /api/posts/{postId}/like
-        ///     {
-        ///         "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        ///     }
+        ///     (Body boş gönderilir, UserId token'dan otomatik alınır)
         ///     
         /// Örnek yanıt (beğenildi):
         /// 
@@ -58,23 +58,35 @@ namespace SocialService.API.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(object), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> LikePost(Guid postId, [FromBody] LikePostRequest request)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> LikePost(Guid postId) // [FromBody] parametresi tamamen kaldırıldı
         {
             try
             {
-                // JWT token'dan UserId'yi al (şimdilik request'ten alıyoruz, sonra Claims'den alınabilir)
+                // JWT token'dan UserId'yi alıyoruz
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                               ?? User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    return Unauthorized(new { error = "Kullanıcı kimliği doğrulanamadı." });
+                }
+
+                // Token'dan aldığımız ID'yi komuta veriyoruz
                 var command = new LikePostCommand
                 {
                     PostId = postId,
-                    UserId = request.UserId // TODO: HttpContext.User.Claims'den alınmalı
+                    UserId = userId
                 };
 
-                var isLiked = await _mediator.Send(command);
                 
-                return Ok(new { 
-                    postId = postId, 
-                    userId = request.UserId, 
-                    isLiked = isLiked 
+                var isLiked = await _mediator.Send(command);
+
+                return Ok(new
+                {
+                    postId = postId,
+                    userId = userId,
+                    isLiked = isLiked
                 });
             }
             catch (Exception ex)
@@ -82,17 +94,5 @@ namespace SocialService.API.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-    }
-
-    /// <summary>
-    /// Gönderi beğenme isteği modeli
-    /// </summary>
-    public class LikePostRequest
-    {
-        /// <summary>
-        /// Gönderiyi beğenen kullanıcının ID'si
-        /// </summary>
-        /// <example>3fa85f64-5717-4562-b3fc-2c963f66afa6</example>
-        public Guid UserId { get; set; }
     }
 }
