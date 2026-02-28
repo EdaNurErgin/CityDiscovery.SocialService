@@ -169,12 +169,24 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        // Burası en kritik nokta: Gateway üzerinden gelen isteğin 
+        // social-service içindeki swagger.json dosyasını bulmasını sağlar.
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CityDiscovery Social Service V1");
+
+        // Eğer localhost:5000/swagger/social/ adresine girdiğinde 
+        // Swagger'ın açılmasını istiyorsan bu yolu boş bırakmalısın
+        c.RoutePrefix = "swagger";
+    });
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
