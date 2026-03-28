@@ -84,7 +84,28 @@ builder.Services.AddMassTransit(x =>
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 
+// Program.cs içinde bu bloğu bulun veya güncelleyin
+builder.Services.AddHttpClient<IVenueServiceClient, VenueServiceClient>(client =>
+{
+    // Önce appsettings.json'dan adresi oku
+    var url = builder.Configuration["ServiceUrls:VenueService"];
 
+    // Eğer url boşsa veya null ise bir hata fırlat ki nerede hata olduğunu anlayalım
+    if (string.IsNullOrEmpty(url))
+    {
+        throw new Exception("ServiceUrls:VenueService yapılandırması appsettings.json içinde bulunamadı!");
+    }
+
+    client.BaseAddress = new Uri(url);
+    Console.WriteLine($"VenueServiceClient Yapılandırıldı: {client.BaseAddress}");
+});
+
+// Identity Service için de aynısını yapın
+builder.Services.AddHttpClient<IIdentityServiceClient, IdentityServiceClient>(client =>
+{
+    var url = builder.Configuration["ServiceUrls:IdentityService"];
+    client.BaseAddress = new Uri(url);
+});
 
 // JWT Authentication yapılandırması
 builder.Services.AddAuthentication(options =>
