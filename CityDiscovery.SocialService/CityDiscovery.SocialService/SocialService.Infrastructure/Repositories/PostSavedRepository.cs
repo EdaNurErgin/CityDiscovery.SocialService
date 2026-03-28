@@ -36,5 +36,20 @@ namespace SocialService.Infrastructure.Repositories
             _context.PostSaveds.Remove(postSaved);
             await _context.SaveChangesAsync();
         }
+
+        
+        public async Task<List<PostSaved>> GetSavedPostsByUserIdAsync(Guid userId)
+        {
+            return await _context.PostSaveds
+                .Where(ps => ps.UserId == userId)
+                .Include(ps => ps.Post)
+                    .ThenInclude(p => p.Comments)
+                .Include(ps => ps.Post)
+                    .ThenInclude(p => p.Likes)
+                .Include(ps => ps.Post)
+                    .ThenInclude(p => p.Photos)
+                .OrderByDescending(ps => ps.SavedDate) // En son kaydedilen en üstte görünsün
+                .ToListAsync();
+        }
     }
 }

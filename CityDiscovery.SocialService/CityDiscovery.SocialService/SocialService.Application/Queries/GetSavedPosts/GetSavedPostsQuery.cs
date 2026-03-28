@@ -1,12 +1,12 @@
-﻿using System;
+﻿using CityDiscovery.SocialService.SocialServiceShared.Common.DTOs.Social;
+using MediatR;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SocialService.Application.Queries.GetSavedPostsQuery
+namespace SocialService.Application.Queries.GetSavedPosts
 {
-    internal class GetSavedPostsQuery
+    public class GetSavedPostsQuery : IRequest<List<PostDto>>
     {
+        public Guid UserId { get; set; }
     }
 }

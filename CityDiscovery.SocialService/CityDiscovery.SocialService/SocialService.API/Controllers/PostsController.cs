@@ -12,6 +12,7 @@ using SocialService.Application.Queries.GetPost;
 using SocialService.Application.Queries.GetPostLikeCount;
 using SocialService.Application.Queries.GetPostsByUser;
 using SocialService.Application.Queries.GetPostsByVenue;
+using SocialService.Application.Queries.GetSavedPosts;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -319,6 +320,42 @@ namespace SocialService.API.Controllers
 
                 await _mediator.Send(command);
                 return Ok(new { message = "Gönderi kaydedilenlerden çıkarıldı.", isSaved = false });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Giriş yapan kullanıcının kaydettiği tüm gönderileri getirir
+        /// </summary>
+        /// <returns>Kullanıcının kaydettiği gönderilerin listesi</returns>
+        /// <response code="200">Kaydedilen gönderiler başarıyla getirildi</response>
+        /// <response code="401">Yetkisiz işlem (Token geçersiz)</response>
+        [HttpGet("saved")]
+        [ProducesResponseType(typeof(List<PostDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetSavedPosts()
+        {
+            try
+            {
+                // Kimliği token içerisinden çekiyoruz ki başkasının kaydettiği postları göremesin
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                               ?? User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    return Unauthorized(new { error = "Kullanıcı kimliği doğrulanamadı." });
+                }
+
+                var query = new GetSavedPostsQuery
+                {
+                    UserId = userId
+                };
+
+                var savedPosts = await _mediator.Send(query);
+                return Ok(savedPosts);
             }
             catch (Exception ex)
             {

@@ -12,5 +12,6 @@ namespace SocialService.Application.Interfaces
         Task AddAsync(PostSaved postSaved);
         Task<PostSaved> GetByPostAndUserAsync(Guid postId, Guid userId);
         Task RemoveAsync(PostSaved postSaved);
+        Task<List<PostSaved>> GetSavedPostsByUserIdAsync(Guid userId);
     }
 }
