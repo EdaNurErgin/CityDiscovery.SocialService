@@ -218,7 +218,30 @@ if (app.Environment.IsDevelopment())
 }
 
 
+// Fotoğrafların fiziksel olarak kaydedildiği dizin yolunu belirliyoruz
+var uploadsPath = Path.Combine(builder.Environment.WebRootPath ?? builder.Environment.ContentRootPath, "wwwroot", "uploads", "posts");
+
+// Eğer klasör fiziksel olarak yoksa çökmemesi için oluşturuyoruz
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+// 1. Önce post fotoğrafları için özel ayarı ekliyoruz
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads/posts"
+});
+
+// 2. Varsa uygulamanın diğer standart statik dosyaları için varsayılanı da bırakıyoruz
 app.UseStaticFiles();
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 
 app.UseRouting();
